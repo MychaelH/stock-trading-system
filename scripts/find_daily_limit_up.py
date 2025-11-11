@@ -73,13 +73,13 @@ def identify_limit_stocks(stock_data):
     limit_stocks['涨停价'] = limit_stocks['limit_price']
     
     # 选择需要的列
-    result_columns = ['ts_code', 'trade_date', 'open', 'close', 'high', 'low', '涨停价', 'limit_type']
+    result_columns = ['ts_code', 'trade_date', 'open', 'close', 'high', 'low', 'vol', '涨停价', 'limit_type']
     return limit_stocks[result_columns]
 
 def main():
     # 读取pkl文件
     try:
-        df = pd.read_pickle('stock_factors_data_copmuted.pkl')  # 请替换为您的pkl文件路径
+        df = pd.read_pickle('./data/stock_factors_data_simplified.pkl')  # 请替换为您的pkl文件路径
         print(f"成功读取数据，共{len(df)}条记录")
     except FileNotFoundError:
         print("文件未找到，请检查文件路径")
@@ -89,7 +89,7 @@ def main():
         return
     
     # 确保数据格式正确
-    required_columns = ['ts_code', 'trade_date', 'open', 'close', 'high', 'low']
+    required_columns = ['ts_code', 'trade_date', 'open', 'close', 'high', 'low', 'vol']
     if not all(col in df.columns for col in required_columns):
         print("数据列不完整，请检查数据格式")
         return
@@ -117,18 +117,18 @@ def main():
     # 重置索引
     daily_stats = daily_stats.reset_index()
     
-    # 保存结果到CSV文件
+    # 保存结果到pkl文件
     # 1. 每日统计结果
-    daily_stats.to_csv('daily_limit_statistics.csv', index=False, encoding='utf-8-sig')
+    daily_stats.to_pickle('./data/daily_limit_statistics.pkl')
     
     # 2. 详细的涨停股票列表
-    limit_stocks.to_csv('detailed_limit_stocks.csv', index=False, encoding='utf-8-sig')
+    limit_stocks.to_pickle('./data/detailed_limit_stocks.pkl')
     
     print("统计完成！")
     print(f"共发现 {len(limit_stocks)} 次涨停事件")
     print(f"封死涨停: {len(limit_stocks[limit_stocks['limit_type'] == '封死涨停'])} 次")
     print(f"炸板: {len(limit_stocks[limit_stocks['limit_type'] == '炸板'])} 次")
-    print(f"结果已保存到 daily_limit_statistics.csv 和 detailed_limit_stocks.csv")
+    print(f"结果已保存到 daily_limit_statistics.pkl 和 detailed_limit_stocks.pkl")
 
 # 如果需要单独分析某个交易日，可以使用这个函数
 def analyze_specific_date(df, target_date):
